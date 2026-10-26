@@ -28,6 +28,7 @@ import { useLocation } from "react-router-dom";
 import { addDoc, arrayUnion, collection, doc, updateDoc } from "firebase/firestore";
 import { firestore, storage } from "../../firebase/firebase";
 import { getDownloadURL, ref, uploadString } from "firebase/storage";
+import { uploadToCloudinary } from "../../utils/cloudinary";
 
 const CreatePost = () => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -145,13 +146,11 @@ function useCreatePost() {
 		try {
 			const postDocRef = await addDoc(collection(firestore, "posts"), newPost);
 			const userDocRef = doc(firestore, "users", authUser.uid);
-			const imageRef = ref(storage, `posts/${postDocRef.id}`);
-
+			
 			await updateDoc(userDocRef, { posts: arrayUnion(postDocRef.id) });
-			await uploadString(imageRef, selectedFile, "data_url");
-			const downloadURL = await getDownloadURL(imageRef);
-
+			const downloadURL = await uploadToCloudinary(selectedFile);
 			await updateDoc(postDocRef, { imageURL: downloadURL });
+			
 
 			newPost.imageURL = downloadURL;
 
