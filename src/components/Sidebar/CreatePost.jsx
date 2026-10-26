@@ -26,8 +26,7 @@ import usePostStore from "../../store/postStore";
 import useUserProfileStore from "../../store/userProfileStore";
 import { useLocation } from "react-router-dom";
 import { addDoc, arrayUnion, collection, doc, updateDoc } from "firebase/firestore";
-import { firestore, storage } from "../../firebase/firebase";
-import { getDownloadURL, ref, uploadString } from "firebase/storage";
+import { firestore } from "../../firebase/firebase";
 import { uploadToCloudinary } from "../../utils/cloudinary";
 
 const CreatePost = () => {
@@ -146,16 +145,13 @@ function useCreatePost() {
 		try {
 			const postDocRef = await addDoc(collection(firestore, "posts"), newPost);
 			const userDocRef = doc(firestore, "users", authUser.uid);
-			
+
 			await updateDoc(userDocRef, { posts: arrayUnion(postDocRef.id) });
 			const downloadURL = await uploadToCloudinary(selectedFile);
+
 			await updateDoc(postDocRef, { imageURL: downloadURL });
-			
 
 			newPost.imageURL = downloadURL;
-
-			
-			
 
 			if (userProfile.uid === authUser.uid) createPost({ ...newPost, id: postDocRef.id });
 
