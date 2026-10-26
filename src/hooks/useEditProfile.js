@@ -1,3 +1,4 @@
+import { uploadToCloudinary } from "../utils/cloudinary";
 import { useState } from "react";
 import useAuthStore from "../store/authStore";
 import useShowToast from "./useShowToast";
@@ -19,17 +20,14 @@ const useEditProfile = () => {
 		if (isUpdating || !authUser) return;
 		setIsUpdating(true);
 
-		const storageRef = ref(storage, `profilePics/${authUser.uid}`);
 		const userDocRef = doc(firestore, "users", authUser.uid);
 
-		let URL = "";
+let URL = "";
 
-		try {
-			if (selectedFile) {
-				await uploadString(storageRef, selectedFile, "data_url");
-				URL = await getDownloadURL(ref(storage, `profilePics/${authUser.uid}`));
-			}
-
+try {
+    if (selectedFile) {
+        URL = await uploadToCloudinary(selectedFile);
+    }
 
 			const updatedUser = {
 				...authUser,//keep other details as they are
